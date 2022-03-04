@@ -11,6 +11,7 @@ game_over = 0
 level=1
 max_level=5
 score=0
+demention =1
 
 
 screen_width = 1000
@@ -46,17 +47,18 @@ def reset_level(level):
     world = World(level_map)
     return(world)
 #load images
-door_img=pygame.image.load('images/door.jpg')
+door_img=pygame.image.load('images/strelka.png')
 door_img = pygame.transform.scale(door_img, (tile_size, tile_size))
-sun_img = pygame.image.load('images/sun.jpg')
+
 bg_img = pygame.image.load('images/sky.jpeg')
+bg_img = pygame.transform.scale(bg_img, (screen_width, screen_height))
 restart_img = pygame.image.load('images/restart.jpg')
 restart_img= pygame.transform.scale(restart_img, (40, 80))
-coin_img = pygame.image.load('images/coin.jpg')
+coin_img = pygame.image.load('images/coin.png')
 coin_img= pygame.transform.scale(restart_img, (40, 80))
 start_img=pygame.image.load('images/pause.png')
 start_img = pygame.transform.scale(start_img, (40, 80))
-exit_img=pygame.image.load('images/door.jpg')
+exit_img=pygame.image.load('images/strelka.png')
 exit_img = pygame.transform.scale(exit_img, (40, 80))
 chest_img=pygame.image.load('images/chest.jpg')
 chest_img = pygame.transform.scale(chest_img, (80, 80))
@@ -128,6 +130,7 @@ class Player():
         self.width = self.image.get_width()
         self.height = self.image.get_height()
 
+
     def reset(self, x, y):
         self.images_right = []
         self.images_left = []
@@ -151,7 +154,8 @@ class Player():
         self.jumped = False
         self.direction = 0
         self.in_air = True
-        self.number_of_jumpes=self.number_of_jumpes
+        self.number_of_jumpes = self.number_of_jumpes
+
 
     def update(self, game_over):
         dx = 0
@@ -162,15 +166,18 @@ class Player():
         if game_over == 0:
             #get keypresses
             key = pygame.key.get_pressed()
-            if key[pygame.K_SPACE] and self.jumped == False :
+            if key[pygame.K_SPACE] and self.jumped == False and self.number_of_jumpes >0 :
                 self.vel_y = -15
                 self.jumped = True
-                self.number_of_jumpes-=1
-            if key[pygame.K_SPACE] and self.jumped == True and self.number_of_jumpes!=0:
+                self.number_of_jumpes -=1
+
+
+            if key[pygame.K_SPACE] and self.jumped == False and self.number_of_jumpes>0 :
                 self.vel_y = -13
                 #self.jumped = True
                 #self.double_jump=0
-                self.number_of_jumpes=0
+                self.number_of_jumpes-=1
+                print(self.number_of_jumpes)
             if key[pygame.K_SPACE] == False:
                 self.jumped = False
             if key[pygame.K_LEFT]:
@@ -224,7 +231,8 @@ class Player():
                     elif self.vel_y >= 0:
                         dy = tile[1].top - self.rect.bottom
                         self.vel_y = 0
-                        self.in_air=False
+                        self.in_air = False
+                        self.number_of_jumpes = 2
 
 
             #check for collision with enemies
@@ -248,6 +256,7 @@ class Player():
                     elif abs((self.rect.bottom  +dy) - platform.rect.top) < collision_thresh :
                         self.rect.bottom = platform.rect.top -1
                         self.in_air = False
+                        self.jumped = False
                         dy = 0
                     # moving with platforms
                     if platform.move_x !=0:
@@ -279,8 +288,8 @@ class Player():
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load('images/enemy.png')
-        self.image = pygame.transform.scale(self.image, (40, 80))
+        self.image = pygame.image.load('images/enemy2.png')
+        self.image = pygame.transform.scale(self.image, (60, 50))
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -293,7 +302,7 @@ class Enemy(pygame.sprite.Sprite):
         if abs(self.move_counter) > 50:
             self.move_direction *= -1
             self.move_counter *= -1
-        pygame.draw.rect(screen, (255,255,255), self.rect)
+
 
 class Exit(pygame.sprite.Sprite):
     def __init__(self, x, y):
@@ -308,7 +317,7 @@ class Moving_platform(pygame.sprite.Sprite):
 
     def __init__(self, x, y, move_x, move_y):
         pygame.sprite.Sprite.__init__(self)
-        img = pygame.image.load('images/ground.png')
+        img = pygame.image.load(f'images/platform{demention}.png')
         self.image = pygame.transform.scale(img, (tile_size, tile_size // 2))
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -329,15 +338,15 @@ class Moving_platform(pygame.sprite.Sprite):
 class Lava(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
-        img = pygame.image.load('images/lava.jpg')
-        self.image = pygame.transform.scale(img, (tile_size, tile_size // 2))
+        img = pygame.image.load('images/lava.png')
+        self.image = pygame.transform.scale(img, (tile_size, tile_size))
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
 class Coin(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
-        img = pygame.image.load('images/coin.jpg')
+        img = pygame.image.load('images/coin.png')
         self.image = pygame.transform.scale(img, (tile_size//2, tile_size // 2))
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
@@ -346,8 +355,8 @@ class World():
         self.tile_list = []
 
         #load images
-        dirt_img = pygame.image.load('images/ground.png')
-        grass_img = pygame.image.load('images/ground.png')
+        dirt_img = pygame.image.load(f'images/ground{demention}.png')
+        grass_img = pygame.image.load(f'images/ground{demention}.png')
 
         row_count = 0
         for row in data:
@@ -383,7 +392,7 @@ class World():
                     lava = Lava(col_count * tile_size, row_count * tile_size + (tile_size // 2))
                     lava_group.add(lava)
                 if tile == '8':
-                    exit = Exit(col_count * tile_size, row_count * tile_size - (tile_size // 2))
+                    exit = Exit(col_count * tile_size, row_count * tile_size )
                     exit_group.add(exit)
                 if tile == '7':
                     coin = Coin(col_count * tile_size + (tile_size // 2), row_count * tile_size + (tile_size // 2))
@@ -409,8 +418,8 @@ class Items():
         self.tile_list = []
 
         #load images
-        dirt_img = pygame.image.load('images/ground.png')
-        grass_img = pygame.image.load('images/ground.png')
+        dirt_img = pygame.image.load('images/ground1.png')
+        grass_img = pygame.image.load('images/ground1.png')
 
         row_count = 0
         for row in data:
@@ -528,7 +537,7 @@ while run:
     clock.tick(fps)
 
     screen.blit(bg_img, (0, 0))
-    screen.blit(sun_img, (100, 100))
+
 
     if main_menu == True and list_of_items==False:
         if chest_button.draw():
