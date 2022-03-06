@@ -35,7 +35,9 @@ def reset_level(level):
     ball_group.empty()
     platform_group.empty()
     lava_group.empty()
+    star_jump_group.empty()
     exit_group.empty()
+    heart_group.empty()
     scrypt_group.empty()
     stop_scrypt_group.empty()
     found_item_group.empty()
@@ -50,6 +52,8 @@ def reset_level(level):
     world = World(level_map)
     return(world)
 #load images
+sun_image= pygame.image.load('images/sun.jpg')
+star_image= pygame.image.load('images/star_jump.png')
 door_img=pygame.image.load('images/strelka.png')
 door_img = pygame.transform.scale(door_img, (tile_size, tile_size))
 bg_img = pygame.image.load('images/sky.jpeg')
@@ -94,6 +98,9 @@ def check_lives():
     else :
         return True
 
+def extra_lives():
+    global number_of_lives
+    number_of_lives +=1
 
 class Button():
     def __init__(self, x, y, image):
@@ -195,7 +202,6 @@ class Player():
             if key[pygame.K_SPACE] and self.jumped == False and self.number_of_jumpes>0 and self.rect.y>0 and self.rect.y<screen_height :
                 self.vel_y = -13
                 self.number_of_jumpes-=1
-                print(self.number_of_jumpes)
             if key[pygame.K_SPACE] == False:
                 self.jumped = False
             if key[pygame.K_LEFT] and self.rect.x >0:
@@ -203,7 +209,6 @@ class Player():
                 self.counter += 1
                 self.direction = -1
             if key[pygame.K_RIGHT] and self.rect.x <1150:
-                print(self.rect.x)
                 dx += 5
                 self.counter += 1
                 self.direction = 1
@@ -259,6 +264,14 @@ class Player():
                     self.reset(100,700)
                 else:
                     game_over = -1
+            # check for collision with enemies
+            if pygame.sprite.spritecollide(self, star_jump_group, False):
+                self.in_air = False
+                self.jumped = False
+                self.number_of_jumpes = 2
+
+
+
 
             # check for collision with exit
             if pygame.sprite.spritecollide(self, exit_group, False):
@@ -414,15 +427,15 @@ class Lava(pygame.sprite.Sprite):
         self.rect.x = x
         self.rect.y = y
 class Ball(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, x, y, f , image):
         pygame.sprite.Sprite.__init__(self)
-        img = pygame.image.load(f'images/sun.jpg')
-        self.image = pygame.transform.scale(img, (20, 20))
+        img = image
+        self.image = pygame.transform.scale(image, (20, 20))
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
         self.move_direction = 1
-        self.move_x=10
+        self.move_x=f
 
         def update(self):
             self.rect.x += self.move_direction * self.move_x
@@ -433,10 +446,10 @@ class Ball(pygame.sprite.Sprite):
                 self.move_counter *= -1
 
 class Coin(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, x, y , image):
         pygame.sprite.Sprite.__init__(self)
         img = pygame.image.load('images/coin.png')
-        self.image = pygame.transform.scale(img, (tile_size//2, tile_size // 2))
+        self.image = pygame.transform.scale(image, (40, 40))
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
 class World():
@@ -487,7 +500,7 @@ class World():
                     exit = Exit(col_count * tile_size, row_count * tile_size )
                     exit_group.add(exit)
                 if tile == '7':
-                    coin = Coin(col_count * tile_size + (tile_size // 2), row_count * tile_size + (tile_size // 2))
+                    coin = Coin(col_count * tile_size + (tile_size // 2), row_count * tile_size + (tile_size // 2), coin_img)
                     coin_group.add(coin)
                 if tile == 'l':
                     item_mes= Button(col_count * tile_size + (tile_size // 2), row_count * tile_size + (tile_size // 2))
@@ -496,8 +509,16 @@ class World():
                     script =Script(col_count * tile_size , row_count * tile_size )
                     stop_scrypt_group.add(script)
                 if tile == 'b' :
-                   ball= Ball(col_count * tile_size + (tile_size // 2), row_count * tile_size + (tile_size // 2))
+                   ball= Ball(col_count * tile_size + (tile_size // 2), row_count * tile_size + (tile_size // 2), 2, sun_image)
                    ball_group.add(ball)
+                if tile == 'h' :
+                    coin = Coin(col_count * tile_size + (tile_size // 2), row_count * tile_size + (tile_size // 2),heart_img)
+                    heart_group.add(coin)
+                if tile == 'i' :
+                   ball= Ball(col_count * tile_size + (tile_size // 2), row_count * tile_size + (tile_size // 2), 0, star_image)
+                   star_jump_group.add(ball)
+
+
 
                 col_count += 1
             row_count += 1
@@ -528,7 +549,6 @@ class Items():
                     img_rect.y = row_count * tile_size
                     tile = (img, img_rect)
                     self.tile_list.append(tile)
-                #if tile == '2':
 
                 if tile == '5':
                     platform = Moving_platform(col_count * tile_size, row_count * tile_size + (tile_size ))
@@ -569,6 +589,8 @@ coin_group = pygame.sprite.Group()
 found_item_group = pygame.sprite.Group()
 stop_scrypt_group= pygame.sprite.Group()
 ball_group= pygame.sprite.Group()
+heart_group = pygame.sprite.Group()
+star_jump_group = pygame.sprite.Group()
 
 #creating our world
 with open(f'images/level{level}','r') as map_file:
@@ -644,6 +666,8 @@ while run:
             if pygame.sprite.spritecollide(player, coin_group, True):
                 score += 1
             draw_text('X ' + str(score), font_score, (255, 255, 255), tile_size - 10, 10)
+            if pygame.sprite.spritecollide(player, heart_group, True):
+                number_of_lives += 1
 
         ball_group.draw(screen)
         blob_group.draw(screen)
@@ -651,7 +675,9 @@ while run:
         lava_group.draw(screen)
         coin_group.draw(screen)
         exit_group.draw(screen)
+        heart_group.draw(screen)
         found_item_group.draw(screen)
+        star_jump_group.draw(screen)
         game_over = player.update(game_over)
         show_lives()
         # if player has died
