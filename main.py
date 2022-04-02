@@ -1,15 +1,62 @@
 import pygame
-from pygame.locals import *
-import pickle
-from os import path
+import random
 
 pygame.init()
 pause=False
 clock = pygame.time.Clock()
 fps = 60
+skin=1
+with open(f'images/playersInfo.txt/skin', 'r+') as map_file:
+    skin= int(map_file.read())
 game_over = 0
-level=1
-max_level=5
+
+tile_size = 50
+screen_width = 1200
+screen_height = 750
+pygame.init()
+sun_image= pygame.image.load('images/sun.jpg')
+star_image= pygame.image.load('images/star_jump.png')
+door_img=pygame.image.load('images/strelka.png')
+door_img = pygame.transform.scale(door_img, (tile_size, tile_size))
+bg_img = pygame.image.load('images/sky.jpeg')
+bg_img = pygame.transform.scale(bg_img, (screen_width, screen_height))
+play_img = pygame.image.load('images/start.png')
+play_img= pygame.transform.scale(play_img, (320, 80))
+heart_img = pygame.image.load('images/heart.png')
+heart_img= pygame.transform.scale(heart_img, (30, 30))
+coin_img = pygame.image.load('images/coin.png')
+coin_img= pygame.transform.scale(coin_img, (60, 60))
+start_img=pygame.image.load('images/play.png')
+start_img = pygame.transform.scale(start_img, (320,80))
+exit_img=pygame.image.load('images/exit.png')
+exit_img = pygame.transform.scale(exit_img, (320, 80))
+chest_img=pygame.image.load('images/collection.png')
+chest_img = pygame.transform.scale(chest_img, (320, 80))
+back_img=pygame.image.load('images/back.png')
+back_img = pygame.transform.scale(back_img, (80, 80))
+pause_img=pygame.image.load('images/pause.png')
+pause_img = pygame.transform.scale(pause_img, (80, 80))
+back_button_img = pygame.image.load('images/back_button.png')
+back_button_img = pygame.transform.scale(back_button_img, (320,80))
+continue_button_img=pygame.image.load('images/continue_button.png')
+continue_button_img = pygame.transform.scale(continue_button_img, (320,80))
+shot_img=pygame.image.load('images/back.png')
+shot_img = pygame.transform.scale(shot_img, (40,40))
+shop_img=pygame.image.load('images/shop.png')
+shop_img = pygame.transform.scale(shop_img, (80,60))
+main_menu_button_img=pygame.image.load('images/main_menu.png')
+main_menu_button_img = pygame.transform.scale(main_menu_button_img, (320,80))
+new_game_button_img=pygame.image.load('images/new_game.png')
+main_menu_button_img = pygame.transform.scale(main_menu_button_img, (320,80))
+restart_img=pygame.image.load('images/restart.png')
+restart_img= pygame.transform.scale(restart_img, (320,80))
+skins_img=pygame.image.load('images/skins.png')
+skins_img = pygame.transform.scale(skins_img, (600,600))
+choose_img=pygame.image.load('images/choose.png')
+choose_img = pygame.transform.scale(choose_img, (140,40))
+#with open(f'images/playersInfo.txt/num_of_level.txt', 'r+') as map_file:
+    #level = int(map_file.read())
+max_level=7
 score=0
 demention =1
 script = False
@@ -17,14 +64,18 @@ screen_width = 1200
 screen_height = 750
 main_menu = True
 list_of_items=False
+shop_menu = False
 number_of_lives=3
-#define font
+all_balls =[]
 font = pygame.font.SysFont('Bauhaus 93', 70)
 font_score = pygame.font.SysFont('Bauhaus 93', 30)
-
+total_number_of_coins = 0
 
 screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption('Platformer')
+
+
+
 
 #define game variables
 tile_size = 50
@@ -41,6 +92,8 @@ def reset_level(level):
     scrypt_group.empty()
     stop_scrypt_group.empty()
     found_item_group.empty()
+    blade_group.empty()
+    blade2_group.empty()
     with open(f'images/level{level}', 'r') as map_file:
         level_map = []
         for line in map_file:
@@ -52,28 +105,6 @@ def reset_level(level):
     world = World(level_map)
     return(world)
 #load images
-sun_image= pygame.image.load('images/sun.jpg')
-star_image= pygame.image.load('images/star_jump.png')
-door_img=pygame.image.load('images/strelka.png')
-door_img = pygame.transform.scale(door_img, (tile_size, tile_size))
-bg_img = pygame.image.load('images/sky.jpeg')
-bg_img = pygame.transform.scale(bg_img, (screen_width, screen_height))
-play_img = pygame.image.load('images/start.png')
-play_img= pygame.transform.scale(play_img, (320, 80))
-heart_img = pygame.image.load('images/heart.png')
-heart_img= pygame.transform.scale(heart_img, (30, 30))
-coin_img = pygame.image.load('images/coin.png')
-coin_img= pygame.transform.scale(coin_img, (40, 80))
-start_img=pygame.image.load('images/play.png')
-start_img = pygame.transform.scale(start_img, (320,80))
-exit_img=pygame.image.load('images/exit.png')
-exit_img = pygame.transform.scale(exit_img, (320, 80))
-chest_img=pygame.image.load('images/collection.png')
-chest_img = pygame.transform.scale(chest_img, (320, 80))
-back_img=pygame.image.load('images/back.png')
-back_img = pygame.transform.scale(back_img, (80, 80))
-pause_img=pygame.image.load('images/pause.png')
-pause_img = pygame.transform.scale(pause_img, (80, 80))
 
 
 def draw_text(text, font, text_col, x, y):
@@ -101,37 +132,41 @@ def check_lives():
 def extra_lives():
     global number_of_lives
     number_of_lives +=1
+class Moving_platform(pygame.sprite.Sprite):
 
-class Button():
-    def __init__(self, x, y, image):
-        self.image = image
+    def __init__(self, x, y, move_x, move_y):
+        pygame.sprite.Sprite.__init__(self)
+        img = pygame.image.load(f'images/platform{demention}.png')
+        self.image = pygame.transform.scale(img, (tile_size, tile_size // 2))
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
-        self.clicked = False
+        self.move_counter = 0
+        self.move_direction = 1
+        self.move_x = move_x
+        self.move_y = move_y
 
-    def draw(self):
-        action = False
+    def update(self):
+        self.rect.x += self.move_direction * self.move_x
+        self.rect.y += self.move_direction * self.move_y
+        self.move_counter += 1
+        if abs(self.move_counter) > 50:
+            self.move_direction *= -1
+            self.move_counter *= -1
 
-        #get mouse position
-        pos = pygame.mouse.get_pos()
-
-        #check mouseover and clicked conditions
-        if self.rect.collidepoint(pos):
-            if pygame.mouse.get_pressed()[0] == 1 and self.clicked == False:
-                action = True
-                self.clicked = True
-
-        if pygame.mouse.get_pressed()[0] == 0:
-            self.clicked = False
-
-
-        #draw button
-        screen.blit(self.image, self.rect)
-
-        return action
-class Player():
+class Lava(pygame.sprite.Sprite):
     def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        img = pygame.image.load('images/lava.png')
+        self.image = pygame.transform.scale(img, (tile_size, tile_size))
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+
+class Player():
+
+    def __init__(self, x, y):
+
         self.number_of_jumpes=2
         #self.number_of_lives = number_of_lives
         self.images_right = []
@@ -139,7 +174,7 @@ class Player():
         self.index = 0
         self.counter = 0
         for num in range(1, 3):
-            img_right = pygame.image.load(f'images/guy{num}.png')
+            img_right = pygame.image.load(f'images/character{demention}{num}.png')
             img_right = pygame.transform.scale(img_right, (40, 80))
             img_left = pygame.transform.flip(img_right, True, False)
             self.images_right.append(img_right)
@@ -147,7 +182,7 @@ class Player():
         self.image = self.images_right[self.index]
         self.rect = self.image.get_rect()
         self.rect.x = x
-        self.dead_image = pygame.image.load('images/ghost.jpg')
+        self.dead_image = pygame.image.load('images/ghost.png')
         self.dead_image = pygame.transform.scale(self.dead_image, (40, 80))
         self.rect.y = y
         self.vel_y = 0
@@ -162,13 +197,13 @@ class Player():
         self.images_left = []
         self.index = 0
         self.counter = 0
-        for num in range(1, 3):
-            img_right = pygame.image.load(f'images/guy{num}.png')
+        for num in range(1, 6):
+            img_right = pygame.image.load(f'images/character{demention}{num}.png')
             img_right = pygame.transform.scale(img_right, (40, 80))
             img_left = pygame.transform.flip(img_right, True, False)
             self.images_right.append(img_right)
             self.images_left.append(img_left)
-        self.dead_image = pygame.image.load('images/ghost.jpg')
+        self.dead_image = pygame.image.load('images/ghost.png')
         self.dead_image = pygame.transform.scale(self.dead_image, (40, 80))
         self.image = self.images_right[self.index]
         self.rect = self.image.get_rect()
@@ -264,7 +299,13 @@ class Player():
                     self.reset(100,700)
                 else:
                     game_over = -1
-            # check for collision with enemies
+            # check for collision with blades
+                if pygame.sprite.spritecollide(self, blade_group, False) or pygame.sprite.spritecollide(self, blade2_group, False):
+                    if check_lives():
+                        self.reset(100, 700)
+                    else:
+                        game_over = -1
+            # check for collision with stars_jump
             if pygame.sprite.spritecollide(self, star_jump_group, False):
                 self.in_air = False
                 self.jumped = False
@@ -339,7 +380,6 @@ class Player():
 
         return game_over
 
-
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
@@ -355,7 +395,7 @@ class Enemy(pygame.sprite.Sprite):
         self.move_direction = 1
         self.move_counter = 0
         for num in range(1, 9):
-            img_right = pygame.image.load(f'images/enemy{demention}{num}.png')
+            img_right = pygame.image.load(f'images/enemy{1}{num}.png')
             img_right = pygame.transform.scale(img_right, (50, 80))
             img_left = pygame.transform.flip(img_right, True, False)
             self.images_right.append(img_right)
@@ -377,6 +417,141 @@ class Enemy(pygame.sprite.Sprite):
             self.image = self.images_right[self.index]
         if self.move_direction >0:
             self.image = self.images_left[self.index]
+class Button():
+    def __init__(self, x, y, image):
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.clicked = False
+
+    def draw(self):
+        action = False
+
+        #get mouse position
+        pos = pygame.mouse.get_pos()
+
+        #check mouseover and clicked conditions
+        if self.rect.collidepoint(pos):
+            if pygame.mouse.get_pressed()[0] == 1 and self.clicked == False:
+                action = True
+                self.clicked = True
+
+        if pygame.mouse.get_pressed()[0] == 0:
+            self.clicked = False
+
+
+        #draw button
+        screen.blit(self.image, self.rect)
+
+        return action
+
+
+
+
+
+
+
+
+class Ball(pygame.sprite.Sprite):
+    def __init__(self, x, y, image):
+        pygame.sprite.Sprite.__init__(self)
+        img = image
+        self.image = pygame.transform.scale(image, (20, 20))
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.speed = 10
+
+        def update(self):
+            if self.rect.x <=screen_width - self.move_x:
+                self.rect.x +=  self.move_x
+                screen.blit(self.image , (self.rect.x , self.rect.y))
+                return True
+            else:
+                return False
+
+
+class Blade(pygame.sprite.Sprite):
+    def __init__(self, x, y ,  distance):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load('images/blade1.png')
+        self.image = pygame.transform.scale(self.image, (100, 100))
+        self.distance = distance
+        self.imgs_right=[]
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.move_x=2
+        self.move_y=2
+        self.index=1
+        self.images=[]
+        for num in range(1, 10):
+            img_right = pygame.image.load(f'images/blade{num}.png')
+            img_right = pygame.transform.scale(img_right, (40, 80))
+            self.imgs_right.append(img_right)
+        self.image = self.imgs_right[self.index]
+        self.move_counter=-1
+        self.move_direction=1
+
+
+
+    def update(self):
+        self.rect.x += self.move_direction * self.move_x
+        self.rect.y += self.move_direction * self.move_y
+        self.move_counter += 1
+        if abs(self.move_counter) > 50:
+            self.move_direction *= -1
+            self.move_counter *= -1
+        self.index+=1
+        if self.index >= len(self.imgs_right):
+            self.index = 1
+        self.image=self.imgs_right[self.index]
+
+
+class Blade2(pygame.sprite.Sprite):
+    def __init__(self, x, y ,  distance, z, f):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load('images/blade1.png')
+        #self.image = pygame.transform.scale(self.image, (100, 100))
+        self.distance = distance
+        self.img_right=[]
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.move_x=z
+        self.move_y=f
+        self.index=1
+        self.images=[]
+        for num in range(1, 10):
+            img_right = pygame.image.load(f'images/blade{num}.png')
+            img_right = pygame.transform.scale(img_right, (40, 80))
+            self.img_right.append(img_right)
+        #self.image = self.img_right[self.index]
+        self.move_counter=-1
+        self.move_direction=1
+
+
+
+    def update(self):
+        for i in range (0,100):
+
+
+            if self.index>= len(self.img_right):
+                self.index=1
+
+            self.image = self.img_right[self.index]
+            if i>50:
+                self.rect.x += self.move_direction
+            else:
+
+                self.rect.y += self.move_direction
+
+            self.index += 1
+            self.move_counter += 1
+            if abs(self.move_counter) > 50:
+                self.move_direction *= -1
+                self.move_counter *= -1
 
 
 class Exit(pygame.sprite.Sprite):
@@ -396,55 +571,6 @@ class Script(pygame.sprite.Sprite):
         self.rect.x = x
         self.rect.y = y
 
-class Moving_platform(pygame.sprite.Sprite):
-
-    def __init__(self, x, y, move_x, move_y):
-        pygame.sprite.Sprite.__init__(self)
-        img = pygame.image.load(f'images/platform{demention}.png')
-        self.image = pygame.transform.scale(img, (tile_size, tile_size // 2))
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
-        self.move_counter = 0
-        self.move_direction = 1
-        self.move_x = move_x
-        self.move_y = move_y
-
-    def update(self):
-        self.rect.x += self.move_direction * self.move_x
-        self.rect.y += self.move_direction * self.move_y
-        self.move_counter += 1
-        if abs(self.move_counter) > 50:
-            self.move_direction *= -1
-            self.move_counter *= -1
-
-class Lava(pygame.sprite.Sprite):
-    def __init__(self, x, y):
-        pygame.sprite.Sprite.__init__(self)
-        img = pygame.image.load('images/lava.png')
-        self.image = pygame.transform.scale(img, (tile_size, tile_size))
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
-class Ball(pygame.sprite.Sprite):
-    def __init__(self, x, y, f , image):
-        pygame.sprite.Sprite.__init__(self)
-        img = image
-        self.image = pygame.transform.scale(image, (20, 20))
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
-        self.move_direction = 1
-        self.move_x=f
-
-        def update(self):
-            self.rect.x += self.move_direction * self.move_x
-            self.rect.y += self.move_direction * self.move_y
-            self.move_counter += 1
-            if abs(self.move_counter) > 50:
-                self.move_direction *= -1
-                self.move_counter *= -1
-
 class Coin(pygame.sprite.Sprite):
     def __init__(self, x, y , image):
         pygame.sprite.Sprite.__init__(self)
@@ -458,7 +584,8 @@ class World():
 
         #load images
         dirt_img = pygame.image.load(f'images/ground{demention}.png')
-        grass_img = pygame.image.load(f'images/ground{demention}.png')
+        grass_img = pygame.image.load(f'images/ground -with-circled-end-right{demention}.png')
+        grass_img_left_circled = pygame.image.load(f'images/ground -with-circled-end-left{demention}.png')
 
         row_count = 0
         for row in data:
@@ -509,14 +636,33 @@ class World():
                     script =Script(col_count * tile_size , row_count * tile_size )
                     stop_scrypt_group.add(script)
                 if tile == 'b' :
-                   ball= Ball(col_count * tile_size + (tile_size // 2), row_count * tile_size + (tile_size // 2), 2, sun_image)
+                   ball= Ball(col_count * tile_size + (tile_size // 2), row_count * tile_size + (tile_size // 2),  sun_image)
                    ball_group.add(ball)
                 if tile == 'h' :
                     coin = Coin(col_count * tile_size + (tile_size // 2), row_count * tile_size + (tile_size // 2),heart_img)
                     heart_group.add(coin)
                 if tile == 'i' :
-                   ball= Ball(col_count * tile_size + (tile_size // 2), row_count * tile_size + (tile_size // 2), 0, star_image)
+                   ball= Ball(col_count * tile_size + (tile_size // 2), row_count * tile_size + (tile_size // 2),  star_image)
                    star_jump_group.add(ball)
+                if tile == 't' :
+                   blade= Blade(col_count * tile_size + (tile_size // 2), row_count * tile_size + (tile_size // 2),1)
+                   blade_group.add(blade)
+                   print("new blade")
+                if tile == 'u' :
+                   blade= Blade2(col_count * tile_size + (tile_size // 2), row_count * tile_size + (tile_size // 2),1,0,0)
+                   blade2_group.add(blade)
+                   print("new blade")
+                if tile == 'v':
+                    blade = Blade2(col_count * tile_size + (tile_size // 2),row_count * tile_size + (tile_size // 2), 0, 2, 10)
+                    blade2_group.add(blade)
+                    print("new blade")
+                if tile == "a":
+                    img = pygame.transform.scale(grass_img_left_circled, (tile_size, tile_size))
+                    img_rect = img.get_rect()
+                    img_rect.x = col_count * tile_size
+                    img_rect.y = row_count * tile_size
+                    tile = (img, img_rect)
+                    self.tile_list.append(tile)
 
 
 
@@ -591,8 +737,11 @@ stop_scrypt_group= pygame.sprite.Group()
 ball_group= pygame.sprite.Group()
 heart_group = pygame.sprite.Group()
 star_jump_group = pygame.sprite.Group()
-
+blade_group = pygame.sprite.Group()
+blade2_group = pygame.sprite.Group()
 #creating our world
+with open(f'images/playersInfo.txt/num_of_level.txt', 'r+') as map_file:
+    level = int(map_file.read())
 with open(f'images/level{level}','r') as map_file:
     level_map=[]
     for line in map_file:
@@ -608,18 +757,28 @@ with open(f'images/items','r') as map_file:
             line.strip('1')
         items_map.append(line)
 
+
 world = World(level_map)
 items = Items(items_map)
 
 #
 
 # create buttons
-restart_button = Button(screen_width // 2 - 50, screen_height // 2 + 100, play_img)
-start_button = Button(screen_width // 2 - 450, screen_height // 2, start_img)
-exit_button = Button(screen_width -700, screen_height // 2, exit_img)
-chest_button = Button(screen_width // 2 + 200, screen_height // 2, chest_img)
-back_button = Button(screen_width // 2 , screen_height // 2, back_img)
-pause_button = Button(screen_width // - 200 , screen_height // 2, pause_img)
+restart_button = Button(screen_width // 2 -200, screen_height // 2 + 100, restart_img)
+new_game_button = Button(screen_width // 2 - 300, screen_height // 2, new_game_button_img)
+exit_button = Button(screen_width -600, screen_height // 2, exit_img)
+chest_button = Button(screen_width // 2 + 280, screen_height // 2, chest_img)
+back_button = Button(10 , 10, back_img)
+pause_button = Button(10, 10, pause_img)
+shop_menu_button = Button(1100 , 10,  shop_img)
+continue_button = Button(screen_width // 2 - 600, screen_height // 2,  continue_button_img)
+main_menu_button=Button(screen_width//2 , screen_height//2, main_menu_button_img)
+choose_skin_1_button= Button(screen_width//2-255, screen_height//2-93, choose_img)
+choose_skin_2_button= Button(screen_width//2-78 , screen_height//2-93, choose_img)
+choose_skin_3_button= Button(screen_width//2+100 , screen_height//2-93, choose_img)
+choose_skin_4_button= Button(screen_width//2-255 , screen_height//2+115, choose_img)
+choose_skin_5_button= Button(screen_width//2-78 , screen_height//2+115, choose_img)
+choose_skin_6_button= Button(screen_width//2+100 , screen_height//2+115, choose_img)
 run = True
 while run:
 
@@ -634,6 +793,9 @@ while run:
             main_menu = False
         while list_of_items:
             items.draw()
+            if back_button.draw():
+                list_of_items = False
+                main_menu = True
 
             for event in pygame.event.get():
                 key = pygame.key.get_pressed()
@@ -642,16 +804,67 @@ while run:
                     main_menu = True
             pygame.display.update()
 
-
+        if continue_button.draw():
+            main_menu = False
         if exit_button.draw():
             run = False
-        if start_button.draw():
+        if new_game_button.draw():
+            with open(f'images/playersInfo.txt/num_of_level.txt', 'r+') as map_file:
+                map_file.write('1')
+            level=1
             main_menu = False
-    elif(main_menu ==False and list_of_items==False):
+        if shop_menu_button.draw():
+            shop_menu =True
+            main_menu = False
+    elif shop_menu:
+        with open(f'images/playersInfo.txt/skin', 'r+') as map_file:
+            screen.blit(skins_img, (screen_width//2-300 , screen_height//2-300))
+            screen.blit(coin_img , (1140,16))
+            if choose_skin_1_button.draw():
+                map_file.seek(0)
+                map_file.write("1")
+            if choose_skin_2_button.draw():
+                map_file.seek(0)
+                map_file.write("3")
+            if choose_skin_3_button.draw():
+                map_file.seek(0)
+                map_file.write("2")
+            if choose_skin_4_button.draw():
+                map_file.seek(0)
+                map_file.write("4")
+            if choose_skin_5_button.draw():
+                map_file.seek(0)
+                map_file.write("5")
+            if choose_skin_6_button.draw():
+                map_file.seek(0)
+                map_file.write("6")
+        with open('images/playersInfo.txt/money.txt', 'r+') as money_file:
+            result = money_file.read()
+        draw_text(f'{result}', font, (50, 255 , 0), 1030, 10)
+        if back_button.draw():
+             shop_menu = False
+             main_menu = True
+        for event in pygame.event.get():
+            key = pygame.key.get_pressed()
+            if key[pygame.K_SPACE]:
+                list_of_items = False
+                main_menu = True
+        pygame.display.update()
+
+
+    elif(main_menu ==False and list_of_items==False and shop_menu==False):
+        with open(f'images/playersInfo.txt/num_of_level.txt', 'r+') as map_file:
+            level = int(map_file.read())
+        if level>2:
+            demention = 2
+        else:
+            demention=1
         world.draw()
-        if pause_button.draw():
+        key = pygame.key.get_pressed()
+        if  key[pygame.K_q] :
             pause = True
         while pause:
+
             for event in pygame.event.get():
                 key = pygame.key.get_pressed()
                 if key[pygame.K_SPACE]:
@@ -661,6 +874,15 @@ while run:
             blob_group.update()
             ball_group.update()
             platform_group.update()
+            blade_group.update()
+            blade2_group.update()
+            for ball in all_balls:
+                if  ball.update():
+                    ball.draw(screen)
+
+                else:
+                    all_balls.remove(ball)
+                    print(' ball in massiv was broken')
             # update score
             # check if a coin has been collected
             if pygame.sprite.spritecollide(player, coin_group, True):
@@ -678,6 +900,8 @@ while run:
         heart_group.draw(screen)
         found_item_group.draw(screen)
         star_jump_group.draw(screen)
+        blade_group.draw(screen)
+        blade2_group.draw(screen)
         game_over = player.update(game_over)
         show_lives()
         # if player has died
@@ -691,22 +915,50 @@ while run:
 
         # if player has completed the level
         if game_over == 1:
+            #write money and update score
+            with open('images/playersInfo.txt/money.txt', 'r+') as money_file:
+                result=money_file.read()
+                money_file.seek(0)
+                result=int(result)
+                result2=score+result
+                money_file.write(f'{result2}')
+            score=0
             # reset game and go to next level
-            level += 1
+            if level<=max_level:
+                level += 1
+
+            if level>2:
+                demention = 2
+            elif level<2:
+                demention = 1
+            with open(f'images/playersInfo.txt/num_of_level.txt', 'r+') as map_file:
+                map_file.truncate(0)
+                map_file.write(f'{level}')
+
             if level <= max_level:
                 # reset level
                 world_data = []
                 world = reset_level(level)
                 game_over = 0
-            else:
-                draw_text('YOU WIN!', font, (0, 255 / 0), (screen_width // 2) - 140, screen_height // 2)
-                if restart_button.draw():
-                    level = 1
+            elif level>max_level:
+                draw_text('YOU WIN!', font, (0, 255 , 0), (screen_width // 2) - 140, screen_height // 2)
+                if new_game_button.draw():
+                    level=1
+                    demention=1
+                    with open(f'images/playersInfo.txt/num_of_level.txt', 'r+') as map_file:
+                        map_file.write(f'{level}')
                     # reset level
                     world_data = []
                     world = reset_level(level)
                     game_over = 0
                     score = 0
+                    level = 1
+
+                if main_menu_button.draw():
+                    shop_menu = False
+                    main_menu = True
+
+
 
 
 
