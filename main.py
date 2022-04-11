@@ -14,45 +14,45 @@ tile_size = 50
 screen_width = 1200
 screen_height = 750
 pygame.init()
-sun_image= pygame.image.load('images/sun.jpg')
-star_image= pygame.image.load('images/star_jump.png')
-door_img=pygame.image.load('images/strelka.png')
+star_image= pygame.image.load('images/leveldesign/star_jump.png')
+door_img=pygame.image.load('images/leveldesign/strelka.png')
 door_img = pygame.transform.scale(door_img, (tile_size, tile_size))
-bg_img = pygame.image.load('images/sky.jpeg')
+bg_img = pygame.image.load('images/leveldesign/sky.jpeg')
 bg_img = pygame.transform.scale(bg_img, (screen_width, screen_height))
-play_img = pygame.image.load('images/start.png')
+play_img = pygame.image.load('images/leveldesign/start.png')
 play_img= pygame.transform.scale(play_img, (320, 80))
-heart_img = pygame.image.load('images/heart.png')
+heart_img = pygame.image.load('images/leveldesign/heart.png')
 heart_img= pygame.transform.scale(heart_img, (30, 30))
-coin_img = pygame.image.load('images/coin.png')
+coin_img = pygame.image.load('images/leveldesign/coin.png')
 coin_img= pygame.transform.scale(coin_img, (60, 60))
-start_img=pygame.image.load('images/play.png')
+start_img=pygame.image.load('images/leveldesign/play.png')
 start_img = pygame.transform.scale(start_img, (320,80))
-exit_img=pygame.image.load('images/exit.png')
+exit_img=pygame.image.load('images/leveldesign/exit.png')
 exit_img = pygame.transform.scale(exit_img, (320, 80))
-chest_img=pygame.image.load('images/collection.png')
+chest_img=pygame.image.load('images/leveldesign/collection.png')
 chest_img = pygame.transform.scale(chest_img, (320, 80))
-back_img=pygame.image.load('images/back.png')
+back_img=pygame.image.load('images/leveldesign/back.png')
 back_img = pygame.transform.scale(back_img, (80, 80))
-pause_img=pygame.image.load('images/pause.png')
+pause_img=pygame.image.load('images/leveldesign/pause.png')
 pause_img = pygame.transform.scale(pause_img, (80, 80))
-back_button_img = pygame.image.load('images/back_button.png')
+back_button_img = pygame.image.load('images/leveldesign/back_button.png')
 back_button_img = pygame.transform.scale(back_button_img, (320,80))
-continue_button_img=pygame.image.load('images/continue_button.png')
+continue_button_img=pygame.image.load('images/leveldesign/continue_button.png')
 continue_button_img = pygame.transform.scale(continue_button_img, (320,80))
-shot_img=pygame.image.load('images/back.png')
+shot_img=pygame.image.load('images/leveldesign/back.png')
+sun_image=pygame.image.load(f'images/leveldesign/sun.jpg')
 shot_img = pygame.transform.scale(shot_img, (40,40))
-shop_img=pygame.image.load('images/shop.png')
+shop_img=pygame.image.load('images/leveldesign/shop.png')
 shop_img = pygame.transform.scale(shop_img, (80,60))
-main_menu_button_img=pygame.image.load('images/main_menu.png')
+main_menu_button_img=pygame.image.load('images/leveldesign/main_menu.png')
 main_menu_button_img = pygame.transform.scale(main_menu_button_img, (320,80))
-new_game_button_img=pygame.image.load('images/new_game.png')
+new_game_button_img=pygame.image.load('images/leveldesign/new_game.png')
 main_menu_button_img = pygame.transform.scale(main_menu_button_img, (320,80))
-restart_img=pygame.image.load('images/restart.png')
+restart_img=pygame.image.load('images/leveldesign/restart.png')
 restart_img= pygame.transform.scale(restart_img, (320,80))
-skins_img=pygame.image.load('images/skins.png')
+skins_img=pygame.image.load('images/leveldesign/skins.png')
 skins_img = pygame.transform.scale(skins_img, (600,600))
-choose_img=pygame.image.load('images/choose.png')
+choose_img=pygame.image.load('images/leveldesign/choose.png')
 choose_img = pygame.transform.scale(choose_img, (140,40))
 #with open(f'images/playersInfo.txt/num_of_level.txt', 'r+') as map_file:
     #level = int(map_file.read())
@@ -94,7 +94,7 @@ def reset_level(level):
     found_item_group.empty()
     blade_group.empty()
     blade2_group.empty()
-    with open(f'images/level{level}', 'r') as map_file:
+    with open(f'images/levels/level{level}', 'r') as map_file:
         level_map = []
         for line in map_file:
             line = line.strip()
@@ -136,7 +136,7 @@ class Moving_platform(pygame.sprite.Sprite):
 
     def __init__(self, x, y, move_x, move_y):
         pygame.sprite.Sprite.__init__(self)
-        img = pygame.image.load(f'images/platform{demention}.png')
+        img = pygame.image.load(f'images/leveldesign/platform{demention}.png')
         self.image = pygame.transform.scale(img, (tile_size, tile_size // 2))
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -157,7 +157,7 @@ class Moving_platform(pygame.sprite.Sprite):
 class Lava(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
-        img = pygame.image.load('images/lava.png')
+        img = pygame.image.load('images/leveldesign/lava.png')
         self.image = pygame.transform.scale(img, (tile_size, tile_size))
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -174,7 +174,7 @@ class Player():
         self.index = 0
         self.counter = 0
         for num in range(1, 3):
-            img_right = pygame.image.load(f'images/character{demention}{num}.png')
+            img_right = pygame.image.load(f'images/skins/character{demention}{num}.png')
             img_right = pygame.transform.scale(img_right, (40, 80))
             img_left = pygame.transform.flip(img_right, True, False)
             self.images_right.append(img_right)
@@ -182,7 +182,7 @@ class Player():
         self.image = self.images_right[self.index]
         self.rect = self.image.get_rect()
         self.rect.x = x
-        self.dead_image = pygame.image.load('images/ghost.png')
+        self.dead_image = pygame.image.load('images/skins/ghost.png')
         self.dead_image = pygame.transform.scale(self.dead_image, (40, 80))
         self.rect.y = y
         self.vel_y = 0
@@ -198,12 +198,12 @@ class Player():
         self.index = 0
         self.counter = 0
         for num in range(1, 6):
-            img_right = pygame.image.load(f'images/character{demention}{num}.png')
+            img_right = pygame.image.load(f'images/skins/character{demention}{num}.png')
             img_right = pygame.transform.scale(img_right, (40, 80))
             img_left = pygame.transform.flip(img_right, True, False)
             self.images_right.append(img_right)
             self.images_left.append(img_left)
-        self.dead_image = pygame.image.load('images/ghost.png')
+        self.dead_image = pygame.image.load('images/skins/ghost.png')
         self.dead_image = pygame.transform.scale(self.dead_image, (40, 80))
         self.image = self.images_right[self.index]
         self.rect = self.image.get_rect()
@@ -387,7 +387,7 @@ class Enemy(pygame.sprite.Sprite):
         self.images_left = []
         self.index = 0
         self.counter = 0
-        self.image = pygame.image.load('images/enemy11.png')
+        self.image = pygame.image.load('images/enemies/enemy11.png')
         self.image = pygame.transform.scale(self.image, (60, 50))
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -395,7 +395,7 @@ class Enemy(pygame.sprite.Sprite):
         self.move_direction = 1
         self.move_counter = 0
         for num in range(1, 9):
-            img_right = pygame.image.load(f'images/enemy{1}{num}.png')
+            img_right = pygame.image.load(f'images/enemies/enemy{1}{num}.png')
             img_right = pygame.transform.scale(img_right, (50, 80))
             img_left = pygame.transform.flip(img_right, True, False)
             self.images_right.append(img_right)
@@ -475,7 +475,7 @@ class Ball(pygame.sprite.Sprite):
 class Blade(pygame.sprite.Sprite):
     def __init__(self, x, y ,  distance):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load('images/blade1.png')
+        self.image = pygame.image.load('images/enemies/blade1.png')
         self.image = pygame.transform.scale(self.image, (100, 100))
         self.distance = distance
         self.imgs_right=[]
@@ -487,7 +487,7 @@ class Blade(pygame.sprite.Sprite):
         self.index=1
         self.images=[]
         for num in range(1, 10):
-            img_right = pygame.image.load(f'images/blade{num}.png')
+            img_right = pygame.image.load(f'images/enemies/blade{num}.png')
             img_right = pygame.transform.scale(img_right, (40, 80))
             self.imgs_right.append(img_right)
         self.image = self.imgs_right[self.index]
@@ -512,7 +512,7 @@ class Blade(pygame.sprite.Sprite):
 class Blade2(pygame.sprite.Sprite):
     def __init__(self, x, y ,  distance, z, f):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load('images/blade1.png')
+        self.image = pygame.image.load('images/enemies/blade1.png')
         #self.image = pygame.transform.scale(self.image, (100, 100))
         self.distance = distance
         self.img_right=[]
@@ -524,7 +524,7 @@ class Blade2(pygame.sprite.Sprite):
         self.index=1
         self.images=[]
         for num in range(1, 10):
-            img_right = pygame.image.load(f'images/blade{num}.png')
+            img_right = pygame.image.load(f'images/enemies/blade{num}.png')
             img_right = pygame.transform.scale(img_right, (40, 80))
             self.img_right.append(img_right)
         #self.image = self.img_right[self.index]
@@ -574,7 +574,7 @@ class Script(pygame.sprite.Sprite):
 class Coin(pygame.sprite.Sprite):
     def __init__(self, x, y , image):
         pygame.sprite.Sprite.__init__(self)
-        img = pygame.image.load('images/coin.png')
+        img = pygame.image.load('images/leveldesign/coin.png')
         self.image = pygame.transform.scale(image, (40, 40))
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
@@ -583,9 +583,9 @@ class World():
         self.tile_list = []
 
         #load images
-        dirt_img = pygame.image.load(f'images/ground{demention}.png')
-        grass_img = pygame.image.load(f'images/ground -with-circled-end-right{demention}.png')
-        grass_img_left_circled = pygame.image.load(f'images/ground -with-circled-end-left{demention}.png')
+        dirt_img = pygame.image.load(f'images/leveldesign/ground{demention}.png')
+        grass_img = pygame.image.load(f'images/leveldesign/ground -with-circled-end-right{demention}.png')
+        grass_img_left_circled = pygame.image.load(f'images/leveldesign/ground -with-circled-end-left{demention}.png')
 
         row_count = 0
         for row in data:
@@ -636,6 +636,7 @@ class World():
                     script =Script(col_count * tile_size , row_count * tile_size )
                     stop_scrypt_group.add(script)
                 if tile == 'b' :
+
                    ball= Ball(col_count * tile_size + (tile_size // 2), row_count * tile_size + (tile_size // 2),  sun_image)
                    ball_group.add(ball)
                 if tile == 'h' :
@@ -681,8 +682,8 @@ class Items():
         self.tile_list = []
 
         #load images
-        dirt_img = pygame.image.load('images/ground1.png')
-        grass_img = pygame.image.load('images/ground1.png')
+        dirt_img = pygame.image.load('images/leveldesign/ground1.png')
+        grass_img = pygame.image.load('images/leveldesign/ground1.png')
 
         row_count = 0
         for row in data:
@@ -742,14 +743,14 @@ blade2_group = pygame.sprite.Group()
 #creating our world
 with open(f'images/playersInfo.txt/num_of_level.txt', 'r+') as map_file:
     level = int(map_file.read())
-with open(f'images/level{level}','r') as map_file:
+with open(f'images/levels/level{level}','r') as map_file:
     level_map=[]
     for line in map_file:
         line=line.strip()
         for t in line:
             line.strip('1')
         level_map.append(line)
-with open(f'images/items','r') as map_file:
+with open(f'images/levels/items','r') as map_file:
     items_map=[]
     for line in map_file:
         line=line.strip()
