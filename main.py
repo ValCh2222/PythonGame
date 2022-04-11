@@ -1,3 +1,4 @@
+import cursor as cursor
 import pygame
 import random
 
@@ -300,11 +301,11 @@ class Player():
                 else:
                     game_over = -1
             # check for collision with blades
-                if pygame.sprite.spritecollide(self, blade_group, False) or pygame.sprite.spritecollide(self, blade2_group, False):
-                    if check_lives():
-                        self.reset(100, 700)
-                    else:
-                        game_over = -1
+            if pygame.sprite.spritecollide(self, blade_group, False) or pygame.sprite.spritecollide(self, blade2_group, False):
+                if check_lives():
+                    self.reset(100, 700)
+                else:
+                    game_over = -1
             # check for collision with stars_jump
             if pygame.sprite.spritecollide(self, star_jump_group, False):
                 self.in_air = False
@@ -473,6 +474,38 @@ class Ball(pygame.sprite.Sprite):
 
 
 class Blade(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.images_right = []
+        self.images_left = []
+        self.index = 0
+        self.counter = 0
+        self.image = pygame.image.load('images/enemies/blade1.png')
+        self.image = pygame.transform.scale(self.image, (100, 100))
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.move_direction = 1
+        self.move_counter = 0
+        for num in range(1, 10):
+            img_right = pygame.image.load(f'images/enemies/blade{num}.png')
+            img_right = pygame.transform.scale(img_right, (40, 80))
+            self.imgs_right.append(img_right)
+        self.image = self.imgs_right[self.index]
+        self.move_counter = -1
+        self.move_direction = 1
+
+    def update(self):
+        self.rect.x += self.move_direction * self.move_x
+        self.rect.y += self.move_direction * self.move_y
+        self.move_counter += 1
+        if abs(self.move_counter) > 50:
+            self.move_direction *= -1
+            self.move_counter *= -1
+        self.index += 1
+        if self.index >= len(self.imgs_right):
+            self.index = 1
+        self.image = self.imgs_right[self.index]
     def __init__(self, x, y ,  distance):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load('images/enemies/blade1.png')
@@ -781,11 +814,16 @@ choose_skin_4_button= Button(screen_width//2-255 , screen_height//2+115, choose_
 choose_skin_5_button= Button(screen_width//2-78 , screen_height//2+115, choose_img)
 choose_skin_6_button= Button(screen_width//2+100 , screen_height//2+115, choose_img)
 run = True
+
 while run:
+
 
     clock.tick(fps)
 
     screen.blit(bg_img, (0, 0))
+    pygame.mouse.set_visible(0)
+    cursor_image=pygame.transform.scale(pygame.image.load('images/leveldesign/cursor.png'), (50,50))
+
 
 
     if main_menu == True and list_of_items==False:
@@ -850,7 +888,10 @@ while run:
             if key[pygame.K_SPACE]:
                 list_of_items = False
                 main_menu = True
+
         pygame.display.update()
+
+
 
 
     elif(main_menu ==False and list_of_items==False and shop_menu==False):
@@ -905,6 +946,8 @@ while run:
         blade2_group.draw(screen)
         game_over = player.update(game_over)
         show_lives()
+        screen.blit(cursor_image, pygame.mouse.get_pos())
+
         # if player has died
         if game_over == -1 :
             if restart_button.draw():
@@ -972,5 +1015,7 @@ while run:
             run = False
 
     pygame.display.update()
+
+
 
 pygame.quit()
