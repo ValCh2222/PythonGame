@@ -61,7 +61,7 @@ choose_img=pygame.image.load('images/leveldesign/choose.png')
 choose_img = pygame.transform.scale(choose_img, (140,40))
 #with open(f'images/playersInfo.txt/num_of_level.txt', 'r+') as map_file:
     #level = int(map_file.read())
-max_level=15
+max_level=16
 score=0
 demention =1
 script = False
@@ -790,8 +790,6 @@ while run:
 
     cursor_image=pygame.transform.scale(pygame.image.load('images/leveldesign/cursor.png'), (50,50))
 
-
-
     if main_menu == True and list_of_items==False:
         if info_button.draw():
             list_of_items = True
@@ -938,52 +936,34 @@ while run:
 
         # if player has completed the level
         if game_over == 1:
-            #write money and update score
+            # write money and update score
             with open('images/playersInfo.txt/money.txt', 'r+') as money_file:
-                result=money_file.read()
+                result = money_file.read()
                 money_file.seek(0)
-                result=int(result)
-                result2=score+result
+                result = int(result)
+                result2 = score + result
                 money_file.write(f'{result2}')
-            score=0
-            # reset game and go to next level
-            if level<=max_level:
-                level += 1
-
-            if level>=7:
-                demention = 3
-                #bg_img=pygame.image.load(f'images/leveldesign/sky3.png')
-            elif level>3:
-                demention = 2
-                #bg_img = pygame.image.load(f'images/leveldesign/sky2.png')
-            elif level<2:
-                demention = 1
-            with open(f'images/playersInfo.txt/num_of_level.txt', 'r+') as map_file:
-                map_file.truncate(0)
-                map_file.write(f'{level}')
-
-            if level <= max_level:
-                # reset level
-                world_data = []
+            score = 0
+            game_over = 0
+            if level==max_level:
                 world = reset_level(level)
-                game_over = 0
-            elif level>max_level:
-                draw_text('YOU WIN!', font, (0, 255 , 0), (screen_width // 2) - 140, screen_height // 2)
-                if new_game_button.draw():
-                    level=1
-                    demention=1
-                    with open(f'images/playersInfo.txt/num_of_level.txt', 'r+') as map_file:
-                        map_file.write(f'{level}')
-                    # reset level
-                    world_data = []
-                    world = reset_level(level)
-                    game_over = 0
-                    score = 0
-                    level = 1
+                pygame.mouse.set_visible(1)
+                draw_text('YOU WIN!', font, (0, 255, 0), (screen_width // 2) - 140, screen_height // 2)
 
-                if main_menu_button.draw():
-                    shop_menu = False
-                    main_menu = True
+                level = 1
+                world = reset_level(level)
+                with open(f'images/playersInfo.txt/num_of_level.txt', 'r+') as map_file:
+                    map_file.truncate(0)
+                    map_file.write(f'{level}')
+            elif level<max_level:
+                level+=1
+                world = reset_level(level)
+                with open(f'images/playersInfo.txt/num_of_level.txt', 'r+') as map_file:
+                    map_file.truncate(0)
+                    map_file.write(f'{level}')
+
+
+
 
 
 
