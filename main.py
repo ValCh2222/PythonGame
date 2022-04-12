@@ -61,7 +61,7 @@ choose_img=pygame.image.load('images/leveldesign/choose.png')
 choose_img = pygame.transform.scale(choose_img, (140,40))
 #with open(f'images/playersInfo.txt/num_of_level.txt', 'r+') as map_file:
     #level = int(map_file.read())
-max_level=7
+max_level=15
 score=0
 demention =1
 script = False
@@ -162,11 +162,33 @@ class Moving_platform(pygame.sprite.Sprite):
 class Lava(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
-        img = pygame.image.load('images/leveldesign/lava.png')
+
+        img = pygame.image.load('images/enemies/lava.png')
+
         self.image = pygame.transform.scale(img, (tile_size, tile_size))
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
+        self.index=0
+        self.images_mas=[]
+
+
+        for num in range(1, 4):
+            imag = pygame.image.load(f'images/enemies/lava2{num}.png')
+            self.images_mas.append(imag)
+
+
+
+    def update(self):
+
+
+        self.counter = 0
+        self.index += 1
+        if self.index >= len(self.images_mas):
+            self.index = 0
+
+        self.image = self.images_mas[self.index]
+
 
 class Player():
 
@@ -845,7 +867,7 @@ while run:
         pygame.mouse.set_visible(0)
         with open(f'images/playersInfo.txt/num_of_level.txt', 'r+') as map_file:
             level = int(map_file.read())
-        if level>7:
+        if level>4:
             demention = 3
         elif level > 3:
             demention = 2
@@ -871,6 +893,8 @@ while run:
             ball_group.update()
             platform_group.update()
             blade_group.update()
+            if demention==3:
+                lava_group.update()
             blade2_group.update()
             for ball in all_balls:
                 if  ball.update():
@@ -926,10 +950,10 @@ while run:
             if level<=max_level:
                 level += 1
 
-            if level>=2:
+            if level>=7:
                 demention = 3
                 #bg_img=pygame.image.load(f'images/leveldesign/sky3.png')
-            elif level>1:
+            elif level>3:
                 demention = 2
                 #bg_img = pygame.image.load(f'images/leveldesign/sky2.png')
             elif level<2:
