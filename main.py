@@ -10,7 +10,18 @@ skin=1
 with open(f'images/playersInfo.txt/skin', 'r+') as map_file:
     skin= int(map_file.read())
 game_over = 0
+with open(f'images/playersInfo.txt/num_of_level.txt', 'r+') as map_file:
+    level = int(map_file.read())
+max_level=16
 
+score=0
+demention =1
+if level >= 10:
+    demention = 3
+elif level >= 5:
+    demention = 2
+if level < 5:
+    demention = 1
 tile_size = 50
 screen_width = 1200
 screen_height = 750
@@ -20,7 +31,7 @@ info_img = pygame.transform.scale(info_img, (600,600))
 star_image= pygame.image.load('images/leveldesign/star_jump.png')
 door_img=pygame.image.load('images/leveldesign/strelka.png')
 door_img = pygame.transform.scale(door_img, (tile_size, tile_size))
-bg_img = pygame.image.load('images/leveldesign/sky1.png')
+bg_img = pygame.image.load(f'images/leveldesign/sky2.png')
 bg_img = pygame.transform.scale(bg_img, (screen_width, screen_height))
 infobtn_img= pygame.image.load('images/leveldesign/info.png')
 infobtn_img= pygame.transform.scale(infobtn_img, (280, 80))
@@ -57,13 +68,11 @@ restart_img=pygame.image.load('images/leveldesign/restart.png')
 restart_img= pygame.transform.scale(restart_img, (320,80))
 skins_img=pygame.image.load('images/leveldesign/skins.png')
 skins_img = pygame.transform.scale(skins_img, (600,600))
+final_img=pygame.image.load('images/leveldesign/ending.png')
+final_img = pygame.transform.scale(final_img, (500,500))
 choose_img=pygame.image.load('images/leveldesign/choose.png')
 choose_img = pygame.transform.scale(choose_img, (140,40))
-#with open(f'images/playersInfo.txt/num_of_level.txt', 'r+') as map_file:
-    #level = int(map_file.read())
-max_level=16
-score=0
-demention =1
+
 script = False
 screen_width = 1200
 screen_height = 750
@@ -181,13 +190,16 @@ class Lava(pygame.sprite.Sprite):
 
     def update(self):
 
+        if demention==3:
+            self.counter = 0
+            self.index += 1
+            if self.index >= len(self.images_mas):
+                self.index = 0
 
-        self.counter = 0
-        self.index += 1
-        if self.index >= len(self.images_mas):
-            self.index = 0
+            self.image = self.images_mas[self.index]
+        else: self.image=img = pygame.image.load('images/enemies/lava.png')
 
-        self.image = self.images_mas[self.index]
+
 
 
 class Player():
@@ -715,6 +727,12 @@ class World():
                     img_rect.y = row_count * tile_size
                     tile = (img, img_rect)
                     self.tile_list.append(tile)
+                if tile == "w":
+                    img_rect = final_img.get_rect()
+                    img_rect.x = col_count * tile_size
+                    img_rect.y = row_count * tile_size
+                    tile = (final_img, img_rect)
+                    self.tile_list.append(tile)
 
 
 
@@ -802,8 +820,11 @@ while run:
             run = False
         if new_game_button.draw():
             level = 1
+            world = reset_level(level)
+
             with open(f'images/playersInfo.txt/num_of_level.txt', 'r+') as map_file:
-                map_file.write('1')
+                map_file.truncate(0)
+                map_file.write(f'{level}')
 
             main_menu = False
         if shop_menu_button.draw():
@@ -865,9 +886,9 @@ while run:
         pygame.mouse.set_visible(0)
         with open(f'images/playersInfo.txt/num_of_level.txt', 'r+') as map_file:
             level = int(map_file.read())
-        if level>4:
+        if level>=10:
             demention = 3
-        elif level > 3:
+        elif level >= 5:
             demention = 2
         if level<5:
             demention=1
@@ -952,6 +973,7 @@ while run:
 
                 level = 1
                 world = reset_level(level)
+
                 with open(f'images/playersInfo.txt/num_of_level.txt', 'r+') as map_file:
                     map_file.truncate(0)
                     map_file.write(f'{level}')
