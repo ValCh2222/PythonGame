@@ -1,4 +1,3 @@
-import cursor as cursor
 import pygame
 import random
 
@@ -16,12 +15,7 @@ max_level=16
 
 score=0
 demention =1
-if level >= 10:
-    demention = 3
-elif level >= 5:
-    demention = 2
-if level < 5:
-    demention = 1
+
 tile_size = 50
 screen_width = 1200
 screen_height = 750
@@ -41,6 +35,7 @@ heart_img = pygame.image.load('images/leveldesign/heart.png')
 heart_img= pygame.transform.scale(heart_img, (30, 30))
 coin_img = pygame.image.load('images/leveldesign/coin.png')
 coin_img= pygame.transform.scale(coin_img, (60, 60))
+lava_img=pygame.image.load('images/enemies/lava.png')
 start_img=pygame.image.load('images/leveldesign/play.png')
 start_img = pygame.transform.scale(start_img, (320,80))
 exit_img=pygame.image.load('images/leveldesign/exit.png')
@@ -171,23 +166,15 @@ class Moving_platform(pygame.sprite.Sprite):
 class Lava(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
-
-        img = pygame.image.load('images/enemies/lava.png')
-
-        self.image = pygame.transform.scale(img, (tile_size, tile_size))
+        self.image = pygame.transform.scale(lava_img, (tile_size, tile_size))
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
         self.index=0
         self.images_mas=[]
-
-
         for num in range(1, 4):
             imag = pygame.image.load(f'images/enemies/lava2{num}.png')
             self.images_mas.append(imag)
-
-
-
     def update(self):
 
         if demention==3:
@@ -197,7 +184,7 @@ class Lava(pygame.sprite.Sprite):
                 self.index = 0
 
             self.image = self.images_mas[self.index]
-        else: self.image=img = pygame.image.load('images/enemies/lava.png')
+        else: self.image=lava_img
 
 
 
@@ -255,9 +242,6 @@ class Player():
         self.direction = 0
         self.in_air = True
         self.number_of_jumpes= self.number_of_jumpes
-        #self.number_of_lives = self.number_of_lives
-
-
     def update(self, game_over):
         dx = 0
         dy = 0
@@ -302,7 +286,6 @@ class Player():
                     self.image = self.images_right[self.index]
                 if self.move_direction > 0:
                     self.image = self.images_left[self.index]
-
             #add gravity
             self.vel_y += 1
             if self.vel_y > 10:
