@@ -16,7 +16,6 @@ demention = 1
 tile_size = 50
 screen_width = 1200
 screen_height = 750
-pygame.init()
 info_img = pygame.image.load('images/leveldesign/info_info.jpeg')
 info_img = pygame.transform.scale(info_img, (600, 600))
 star_image = pygame.image.load('images/leveldesign/star_jump.png')
@@ -59,6 +58,7 @@ final_img = pygame.image.load('images/leveldesign/ending.png')
 final_img = pygame.transform.scale(final_img, (500, 500))
 choose_img = pygame.image.load('images/leveldesign/choose.png')
 choose_img = pygame.transform.scale(choose_img, (140, 40))
+logo_img = pygame.image.load('images/leveldesign/logo.jpeg')
 
 main_menu = True
 list_of_items = False
@@ -71,6 +71,7 @@ total_number_of_coins = 0
 
 screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption('DinO!!')
+pygame.display.set_icon(logo_img)
 with open(f'images/playersInfo.txt/num_of_level.txt', 'r+') as map_file:
     level = int(map_file.read())
 if level >= 10:
@@ -751,13 +752,6 @@ while run:
             if demention == 3:
                 lava_group.update()
             blade2_group.update()
-            for ball in all_balls:
-                if ball.update():
-                    ball.draw(screen)
-
-                else:
-                    all_balls.remove(ball)
-                    print(' ball in massiv was broken')
             # update score
             # check if a coin has been collected
             if pygame.sprite.spritecollide(player, coin_group, True):
@@ -779,7 +773,6 @@ while run:
         blade2_group.draw(screen)
         game_over = player.update(game_over)
         show_lives()
-        # screen.blit(cursor_image, pygame.mouse.get_pos())
 
         # if player has died
         if game_over == -1:
